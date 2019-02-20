@@ -35,8 +35,34 @@ def test_mock_datetime_very_old():
             is_very_old = True
     assert is_very_old
 
-def test_mock_string():
-    pass
+def test_mock_string_simple():
+    mock = DFMock()
+    strings = mock._mock_string(count=100)
+    
+    assert len(strings) == 100
+    for string in strings:
+        assert isinstance(string, str)
+
+def test_mock_string_min_length():
+    mock = DFMock()
+    strings = mock._mock_string(count=1000, min_len=1)
+    
+    ## since default is 10
+    lens = [len(string) for string in strings]
+    assert min(lens) < 10
+
+def test_mock_string_max_length():
+    mock = DFMock()
+    strings = mock._mock_string(count=1000, max_len=100)
+    
+    ## since default is 40
+    lens = [len(string) for string in strings]
+    assert max(lens) > 10
+
+def test_mock_string_min_greater_max():
+    mock = DFMock()
+    with pytest.raises(ValueError):
+        mock._mock_string(count=100, max_len=10, min_len=100)
 
 def test_mock_integer():
     pass

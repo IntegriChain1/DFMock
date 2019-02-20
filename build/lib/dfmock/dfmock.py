@@ -27,13 +27,9 @@ class DFMock:
         return self._data  
 
 
-
-    def _generate_dataframe(self)->None:
-        ""
-
-    def _random_string(self, count:int)-> list:
+    def _mock_string(self, count:int, min_len:int = 10, max_len:int = 40)-> list:
         def make_rand_string():
-            length = random.randrange(10,40)
+            length = random.randrange(min_len, max_len)
             string = ''
             for char in range(0,length):
                 string += random.sample(low_letters,k=1)[0]
