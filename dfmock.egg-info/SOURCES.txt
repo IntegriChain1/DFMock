@@ -1,0 +1,10 @@
+README.md
+setup.py
+dfmock/__init__.py
+dfmock/__main__.py
+dfmock/dfmock.py
+dfmock.egg-info/PKG-INFO
+dfmock.egg-info/SOURCES.txt
+dfmock.egg-info/dependency_links.txt
+dfmock.egg-info/requires.txt
+dfmock.egg-info/top_level.txt
