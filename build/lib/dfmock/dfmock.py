@@ -30,7 +30,7 @@ class DFMock:
 
     @property
     def size(self)->float:
-        return round(sys.getsizeof(self._dataframe)/1e+6,2)
+        return str(round(sys.getsizeof(self._dataframe)/1e+6,2)) + " MB"
 
     @property
     def count(self)->int:

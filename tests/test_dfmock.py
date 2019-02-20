@@ -131,4 +131,4 @@ def test_grow_dataframe_to_size():
     mock.generate_dataframe()
     mock.grow_dataframe_to_size(10)
 
-    assert mock.size >= 10
+    assert float(mock.size.split()[0]) >= 10
