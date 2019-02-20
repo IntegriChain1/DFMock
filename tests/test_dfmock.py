@@ -123,3 +123,12 @@ def test_set_columns_valid():
     mock.columns = cols
 
     assert mock.columns == cols
+
+def test_grow_dataframe_to_size():
+    mock = DFMock(count=100)
+    cols= {"hamburger":"string","hotdog":"timedelta","chicken":"datetime","nuggets":"category"}
+    mock.columns = cols
+    mock.generate_dataframe()
+    mock.grow_dataframe_to_size(10)
+
+    assert mock.size >= 10

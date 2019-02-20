@@ -1,9 +1,9 @@
 import random
+import sys
 import pandas as pd
 from string import ascii_lowercase as low_letters
-## TODO: logging module
-import logging
 from datetime import datetime
+## TODO: this needs a logging module
 
 class DFMock:
     " sample dataframe maker."
@@ -29,6 +29,10 @@ class DFMock:
         self._columns = columns      
 
     @property
+    def size(self)->float:
+        return round(sys.getsizeof(self._dataframe)/1e+6,2)
+
+    @property
     def count(self)->int:
         return self._count
 
@@ -43,23 +47,39 @@ class DFMock:
         else:
             raise ValueError("dataframe has not yet been created. Run generate_dataframe first.")
 
-    def generate_dataframe(self)->None:
-        self._dataframe = pd.DataFrame()
+    def grow_dataframe_to_size(self,size:int)->None:
+        """ appends rows to the frame until it reaches or exceeds the size (in MB)"""
+        size = size * 1e+6 
+        def grower(frame:pd.DataFrame)->pd.DataFrame:
+            cur_size = sys.getsizeof(frame)
+            if cur_size >= size:
+                return frame
+            else: 
+                return grower(frame.append(self._generate_dataframe()))
+        sized_frame = grower(self._dataframe)
+        self._dataframe = sized_frame
+
+    def _generate_dataframe(self)->pd.DataFrame:
+        dataframe = pd.DataFrame()
         for key, value in self._columns.items():
             v = value.lower()
             k = key.lower()
             if v == "string":
-                self._dataframe[k] = self._mock_string(count=self._count)
+                dataframe[k] = self._mock_string(count=self._count)
             elif v == "int":
-                self._dataframe[k] = self._mock_integer(count=self._count)
+                dataframe[k] = self._mock_integer(count=self._count)
             elif v == "float":
-                self._dataframe[k] = self._mock_float(count=self._count)
+                dataframe[k] = self._mock_float(count=self._count)
             elif v == "bool":
-                self._dataframe[k] = self._mock_bool(count=self._count)
+                dataframe[k] = self._mock_bool(count=self._count)
             elif v == "timedelta":
-                self._dataframe[k] = self._mock_timedelta(count=self._count)
+                dataframe[k] = self._mock_timedelta(count=self._count)
             elif v == "datetime":
-                self._dataframe[k] = self._mock_datetime(count=self._count)
+                dataframe[k] = self._mock_datetime(count=self._count)
+        return dataframe
+
+    def generate_dataframe(self)->None:
+        self._dataframe = self._generate_dataframe()
 
     def _mock_integer(self, count:int)->list:
         return [random.randrange(1000000) for x in range(0,count)]
