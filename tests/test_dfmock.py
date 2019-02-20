@@ -20,7 +20,20 @@ def test_mock_datetime_past():
             in_future = True
     assert not in_future 
 
+def test_mock_datetime_many():
+    mock = DFMock()
+    count = 10000
+    stamps = mock._mock_datetime(count=count)
+    assert len(stamps) == count
 
+def test_mock_datetime_very_old():
+    mock = DFMock()
+    stamps = mock._mock_datetime(year_start=1800, count=1000)
+    is_very_old = False
+    for stamp in stamps:
+        if stamp.year < 1900:
+            is_very_old = True
+    assert is_very_old
 
 def test_mock_string():
     pass
