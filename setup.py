@@ -12,7 +12,7 @@ setup(
     long_description=description,
     author="Ethan Knox",
     author_email="ethan.m.knox@gmail.com",
-    url="https://github.com/norton120/dfmock",
+    url="https://github.com/IntegriChain1/DFMock",
     license="MIT",
     classifiers=[
         "License :: OSI Approved :: MIT License",
