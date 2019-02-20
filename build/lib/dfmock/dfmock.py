@@ -7,12 +7,27 @@ from datetime import datetime
 
 class DFMock:
     " sample dataframe maker."
-    """
-    def __init__(self, count:int = 100)->None:
-        self._data = pd.DataFrame({ "time_of_event":self._random_timestamp(count),
-                                    "event_name":self._random_string(count)}
-                          )
-    """   
+
+    def __init__(self, count:int = 100, columns:dict = dict())->None:
+        self._count = count
+        self._columns = columns
+
+    @property
+    def columns(self):
+        return self._columns
+
+    @columns.setter
+    def columns(self, columns:dict)->None:
+        """ sets the column names and types for the dataframe.
+            ARGS:
+                - columns (dict) a dictionary in the format {name:datatype}
+        """
+        VALID_DATATYPES = ("string","int","float","bool","timedelta","datetime","category")
+        for k,v in columns.items():
+            if v.lower() not in VALID_DATATYPES:
+                raise ValueError(f"{v} is not a valid data type. Valid data types are: {','.join(VALID_DATATYPES)}")
+        self._columns = columns      
+
     @property
     def count(self)->int:
         return self._count
@@ -21,11 +36,53 @@ class DFMock:
     def count(self,count:int)->None:
         self._count = int(count)
 
-
     @property
-    def data(self):
-        return self._data  
+    def dataframe(self):
+        if hasattr(self,'_dataframe'):
+            return self._dataframe 
+        else:
+            raise ValueError("dataframe has not yet been created. Run generate_dataframe first.")
 
+    def generate_dataframe(self)->None:
+        self._dataframe = pd.DataFrame()
+        for key, value in self._columns.items():
+            v = value.lower()
+            k = key.lower()
+            if v == "string":
+                self._dataframe[k] = self._mock_string(count=self._count)
+            elif v == "int":
+                self._dataframe[k] = self._mock_integer(count=self._count)
+            elif v == "float":
+                self._dataframe[k] = self._mock_float(count=self._count)
+            elif v == "bool":
+                self._dataframe[k] = self._mock_bool(count=self._count)
+            elif v == "timedelta":
+                self._dataframe[k] = self._mock_timedelta(count=self._count)
+            elif v == "datetime":
+                self._dataframe[k] = self._mock_datetime(count=self._count)
+
+    def _mock_integer(self, count:int)->list:
+        return [random.randrange(1000000) for x in range(0,count)]
+
+    def _mock_float(self, count:int)->list:
+        return [float(random.random()) for x in range(0,count)]
+
+    def _mock_boolean(self, count:int)->list:
+        return [random.choice((True,False)) for x in range(0,count)]
+
+    def _mock_category(self, count:int)->pd.Categorical:
+        #TODO: this should accept variable for the number of category elements
+        category_elements = ["a","b","c"]
+        category_content = [random.sample(category_elements,k=1)[0] for x in range(0,count)]
+        return pd.Categorical(category_content, categories=category_elements)
+
+    def _mock_timedelta(self, count:int)->list:
+        def make_rand_td():
+            days = random.randrange(100)
+            hours = random.randrange(12)
+            seconds = random.randrange(60)
+            return pd.Timedelta(days=days,hours=hours,seconds=seconds)
+        return[make_rand_td() for x in range(0,count)]
 
     def _mock_string(self, count:int, min_len:int = 10, max_len:int = 40)-> list:
         def make_rand_string():

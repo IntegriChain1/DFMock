@@ -64,17 +64,62 @@ def test_mock_string_min_greater_max():
     with pytest.raises(ValueError):
         mock._mock_string(count=100, max_len=10, min_len=100)
 
-def test_mock_integer():
-    pass
+def test_mock_integer_simple():
+    mock = DFMock()
+    ints = mock._mock_integer(count=100)
 
-def test_mock_float():
-    pass
+    assert len(ints) == 100
+    for i in ints:
+        assert isinstance(i, int)
 
-def test_mock_bool():
-    pass
 
-def test_mock_category():
-    pass
+def test_mock_float_simple():
+    mock = DFMock()
+    floats = mock._mock_float(count=100)
 
-def test_mock_timedelta():
-    pass
+    assert len(floats) == 100
+    for f in floats:
+        assert isinstance(f, float)
+
+def test_mock_bool_simple():
+    mock = DFMock()
+    bools = mock._mock_boolean(count=100)
+
+    assert len(bools) == 100
+    for b in bools:
+        assert isinstance(b, bool)
+
+def test_mock_category_simple():
+    mock = DFMock()
+    categories = mock._mock_category(count=100)
+
+    assert len(categories) == 100
+    assert isinstance(categories, pd.Categorical)
+
+def test_mock_timedelta_simple():
+    mock = DFMock()
+    timedeltas = mock._mock_timedelta(count=100)
+
+    assert len(timedeltas) == 100
+    for t in timedeltas:
+        assert isinstance(t, pd.Timedelta)
+
+def test_generate_dataframe():
+    mock =DFMock()
+    mock.count = 100
+
+    mock.generate_dataframe()
+    assert isinstance(mock.dataframe, pd.DataFrame)
+
+def test_set_columns_invalid():
+    mock = DFMock(count=100)
+    bad_cols= {"hamburger":"string","hotdog":"fruit"}
+    with pytest.raises(ValueError):
+        mock.columns = bad_cols
+
+def test_set_columns_valid():
+    mock = DFMock(count=100)
+    cols= {"hamburger":"string","hotdog":"timedelta","chicken":"datetime","nuggets":"category"}
+    mock.columns = cols
+
+    assert mock.columns == cols
