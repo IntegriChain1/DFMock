@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
 
 package_name = "dfmock"
-package_version = "0.0.1"
+package_version = "0.0.12"
 description = "utility for generating mock data sets as pandas dataframes"
 
 
