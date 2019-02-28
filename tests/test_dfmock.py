@@ -124,7 +124,7 @@ def test_set_columns_valid():
 
     assert mock.columns == cols
 
-def test_grow_dataframe_to_size():
+def d_test_grow_dataframe_to_size():
     mock = DFMock(count=100)
     cols= {"hamburger":"string","hotdog":"timedelta","chicken":"datetime","nuggets":"category"}
     mock.columns = cols
@@ -132,3 +132,19 @@ def test_grow_dataframe_to_size():
     mock.grow_dataframe_to_size(10)
 
     assert float(mock.size.split()[0]) >= 10
+
+def test_mock_grouping():
+    mock = DFMock(count=100)
+    cols = {"three_vals_strings": {"option_count": 3, "option_type":"string"}}
+    mock.columns = cols
+    mock.generate_dataframe()
+    d = mock.dataframe
+    assert(len(d.groupby("three_vals_strings").nunique()) == 3)
+
+def test_histogram_grouping():
+    mock = DFMock(count=100)
+    cols = {"three_vals_strings": {"option_count": 4, "option_type":"string", "histogram":(2,3,4,1,)}}
+    mock.columns = cols
+    mock.generate_dataframe()
+    d = mock.dataframe
+    assert set(d.groupby("three_vals_strings").size()) == set([20,30,40,10])
