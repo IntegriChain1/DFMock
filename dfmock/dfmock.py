@@ -130,11 +130,12 @@ class DFMock:
             multiple = int(count/len(hist_list))
             return hist_list * multiple
 
-        # if no histogram, return the
+        # if no histogram, return the opt set
         opt_set = option_switch(option_type, option_count)
-        multiple = math.ceil(option_count/count)
+        multiple = int(math.ceil(count/option_count))
+        
         oversized_list = opt_set * multiple
-        return oversized_list[:count - 1]
+        return oversized_list[:count]
 
     def _mock_integer(self, count: int)->list:
         return [random.randrange(1000000) for x in range(0, count)]

@@ -133,6 +133,14 @@ def d_test_grow_dataframe_to_size():
 
     assert float(mock.size.split()[0]) >= 10
 
+def test_mock_group_and_non_group():
+    mock = DFMock(count=100)
+    cols = {"three_vals_strings": {"option_count": 3, "option_type":"string"}, "one_string_val":"string"}
+    mock.columns = cols
+    mock.generate_dataframe()
+    d = mock.dataframe
+    assert d['three_vals_strings'].count() == 100
+
 def test_mock_grouping():
     mock = DFMock(count=100)
     cols = {"three_vals_strings": {"option_count": 3, "option_type":"string"}}
