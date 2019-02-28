@@ -85,6 +85,8 @@ class DFMock:
                     dataframe[k] = self._mock_boolean(count=self._count)
                 elif v == "timedelta":
                     dataframe[k] = self._mock_timedelta(count=self._count)
+                elif v == "category":
+                    dataframe[k] = self._mock_category(count=self._count)
                 elif v == "datetime":
                     dataframe[k] = self._mock_datetime(count=self._count)
         return dataframe
@@ -104,7 +106,9 @@ class DFMock:
             elif option_type in ("bool", "boolean"):
                 opt_set = self._mock_boolean(count=option_count)
             elif option_type == "timedelta":
-                opt_set = self._mock_timedelta(count=option_count)
+                raise NotImplementedError("Timedelta datatype is not supported for groupings at this time.")
+            elif option_type == "category":
+                raise NotImplementedError("Category datatype is not supported for groupings at this time.")
             elif option_type == "datetime":
                 opt_set = self._mock_datetime(count=option_count)
             else:
