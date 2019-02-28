@@ -140,3 +140,11 @@ def test_mock_grouping():
     mock.generate_dataframe()
     d = mock.dataframe
     assert(len(d.groupby("three_vals_strings").nunique()) == 3)
+
+def test_histogram_grouping():
+    mock = DFMock(count=100)
+    cols = {"three_vals_strings": {"option_count": 4, "option_type":"string", "histogram":(2,3,4,1,)}}
+    mock.columns = cols
+    mock.generate_dataframe()
+    d = mock.dataframe
+    assert set(d.groupby("three_vals_strings").size()) == set([20,30,40,10])

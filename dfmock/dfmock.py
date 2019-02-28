@@ -66,7 +66,7 @@ class DFMock:
             if isinstance(value,dict):
                 dataframe[key] = self._mock_grouping(count=self._count,
                                                    option_count = value['option_count'],
-                                                   option_type = value['option_type'] )
+                                                   option_type = value['option_type'], histogram= value.get('histogram',None))
             else:
                 v = value.lower()
                 k = key.lower()
@@ -87,24 +87,49 @@ class DFMock:
     def generate_dataframe(self)->None:
         self._dataframe = self._generate_dataframe()
 
-    def _mock_grouping(self,count:int, option_count:int, option_type:str)->list:
-        if option_type == "string":
-            opt_set = self._mock_string(count=option_count)
-        elif option_type in ("int","integer"):
-            opt_set= self._mock_integer(count=option_count)
-        elif option_type ==  "float":
-            opt_set = self._mock_float(count=option_count)
-        elif option_type in ("bool","boolean"):
-            opt_set = self._mock_boolean(count=option_count)
-        elif option_type ==  "timedelta":
-            opt_set = self._mock_timedelta(count=option_count)
-        elif option_type ==  "datetime":
-            opt_set = self._mock_datetime(count=option_count)
-        else:
-            raise ValueError(f"Invalid datatype set for grouping column: {option_type}")
-        multiple = math.ceil(option_count/self._count)
+    def _mock_grouping(self,count:int, option_count:int, option_type:str, histogram:iter = None)->list:
+        
+        def option_switch(option_type,option_count):
+            if option_type == "string":
+                opt_set = self._mock_string(count=option_count)
+            elif option_type in ("int","integer"):
+                opt_set= self._mock_integer(count=option_count)
+            elif option_type ==  "float":
+                opt_set = self._mock_float(count=option_count)
+            elif option_type in ("bool","boolean"):
+                opt_set = self._mock_boolean(count=option_count)
+            elif option_type ==  "timedelta":
+                opt_set = self._mock_timedelta(count=option_count)
+            elif option_type ==  "datetime":
+                opt_set = self._mock_datetime(count=option_count)
+            else:
+                raise ValueError(f"Invalid datatype set for grouping column: {option_type}")
+            return opt_set
+
+
+
+        if histogram is not None:
+            hist_error = """ To use histogram, make sure that:
+- your count is a multiple of 10
+- you pass an iterable
+- the number of values in the iterable matches option_count
+- the values are integers 0 < 10
+- the values sum to exactly 10
+"""        
+            if (len(histogram) != option_count) or (count % 10 != 0):
+                raise ValueError(hist_error + f" : {len(histogram)} hist values, {option_count} options")
+            hist_list = []
+            for hist_count in histogram:
+                hist_row = option_switch(option_type, 1)
+                hist_list = hist_list + (hist_row * hist_count)
+            multiple = int(count/len(hist_list))  
+            return hist_list * multiple
+        
+        ## if no histogram, return the        
+        opt_set = option_switch(option_type, option_count)
+        multiple = math.ceil(option_count/count)
         oversized_list = opt_set * multiple
-        return oversized_list[:self._count -1]
+        return oversized_list[:count -1]
 
     def _mock_integer(self, count:int)->list:
         return [random.randrange(1000000) for x in range(0,count)]
