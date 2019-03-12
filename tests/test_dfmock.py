@@ -9,14 +9,14 @@ def test_mock_datetime_simple():
     stamps = mock._mock_datetime(count=1)
     
     assert len(stamps) == 1
-    assert isinstance(stamps[0], pd.Timestamp)
+    assert isinstance(stamps[0], datetime)
 
 def test_mock_datetime_past():
     mock = DFMock()
     stamps = mock._mock_datetime(count=100, allow_future=False)
     in_future = False
     for stamp in stamps:
-        if stamp > pd.Timestamp(ts_input = datetime.now().isoformat() + " +4"):
+        if stamp > datetime.now():
             in_future = True
     assert not in_future 
 

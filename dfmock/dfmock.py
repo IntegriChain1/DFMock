@@ -4,11 +4,11 @@ import sys
 import pandas as pd
 from string import ascii_lowercase as low_letters
 from datetime import datetime
-# TODO: this needs a logging module
-
+import logging
 
 class DFMock:
     " sample dataframe maker."
+    logger = logging.getLogger(__name__)
 
     def __init__(self, count: int = 100, columns: dict = dict())->None:
         self._count = count
@@ -54,10 +54,12 @@ class DFMock:
 
     def grow_dataframe_to_size(self, size: int)->None:
         """ appends rows to the frame until it reaches or exceeds the size (in MB)"""
+        self.logger.debug(f"Growing dataframe to {size}MB.")
         size = size * 1e+6
-
+        
         def grower(frame: pd.DataFrame)->pd.DataFrame:
             cur_size = sys.getsizeof(frame)
+            self.logger.debug(f"grower size is now {cur_size} bytes")
             if cur_size >= size:
                 return frame
             else:
@@ -175,24 +177,42 @@ class DFMock:
         return [make_rand_string() for x in range(0, count)]
 
     def _mock_datetime(self, count: int, year_start: int = 2000, allow_future: bool = True)-> list:
+        """ makes random datetimes
+            ARGS:
+                - count(int) the number of records to make
+                - year_start(int) the earliest year allowed in the set
+                - allow_future(bool) if false, all records are < current date
+        """
+        dates = []
+        for x in range(0,count):
+            year,mon,day,hour,minute,second,tz = self._make_ts_vals(year_start,allow_future)
+            dates.append(datetime(int(year),int(mon),int(day),int(hour),int(minute)))
+        return dates
+            
+
+    def _mock_timestamp(self, count: int, year_start: int = 2000, allow_future: bool = True)-> list:
         """ makes random pandas timestamps.
             ARGS:
                 - count(int) the number of records to make
                 - year_start(int) the earliest year allowed in the set
                 - allow_future(bool) if false, all records are < current date
         """
-        def make_ts():
-            current = datetime.now()
-            tz = random.sample(["+4", "+5", "-8"], k=1)[0]
-            year_end = current.year if not allow_future else 2100
-            year = random.randrange(year_start, year_end)
-            # TODO: this is a hack way to enforce allow_future. make less hacky please!
-            max_month = current.month - 1 if not allow_future else 12
-            mon = str(random.randrange(1, 12)).rjust(2, '0')
-            day = str(random.randrange(1, 28)).rjust(2, '0')
-            hour = str(random.randrange(0, 23)).rjust(2, '0')
-            sixty = str(random.randrange(60)).rjust(2, '0')
-            ts_string = f"{year}/{mon}/{day} {hour}:{sixty}:{sixty} {tz}"
-            return pd.Timestamp(ts_input=ts_string)
+        return [pd.Timestamp(ts_input="{}/{}/{} {}:{}:{} {}".format(self._make_ts_vals(year_start,allow_future))) for x in range(0, count)]
 
-        return [make_ts() for x in range(0, count)]
+    def _make_ts_vals(self, year_start: int, allow_future: bool)-> tuple:
+        """ Generates the random data for date / ts vals"""
+
+        current = datetime.now()
+        tz = random.sample(["+4", "+5", "-8"], k=1)[0]
+        year_end = current.year if not allow_future else 2100
+        year = random.randrange(year_start, year_end)
+        # TODO: this is a hack way to enforce allow_future. make less hacky please!
+        max_month = current.month - 1 if not allow_future else 12
+        mon = str(random.randrange(1, 12)).rjust(2, '0')
+        day = str(random.randrange(1, 28)).rjust(2, '0')
+        hour = str(random.randrange(0, 23)).rjust(2, '0')
+        sixty = str(random.randrange(60)).rjust(2, '0')
+        
+        return tuple([year, mon, day, hour, sixty, sixty, tz])
+
+
