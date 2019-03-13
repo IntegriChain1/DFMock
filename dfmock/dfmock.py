@@ -5,6 +5,8 @@ import pandas as pd
 from string import ascii_lowercase as low_letters
 from datetime import datetime
 import logging
+import multiprocessing
+
 
 class DFMock:
     " sample dataframe maker."
@@ -28,8 +30,9 @@ class DFMock:
                            "bool", "boolean", "timedelta", "datetime", "category")
         for k, v in columns.items():
             if (not isinstance(v, dict) and v.lower() not in VALID_DATATYPES):
-                raise ValueError(
-                    f"{v} is not a valid data type. Valid data types are: {','.join(VALID_DATATYPES)} OR a dict for grouping columns")
+                invalid_message = f"{v} is not a valid data type. Valid data types are: {','.join(VALID_DATATYPES)} OR a dict for grouping columns"
+                self.logger.critical(invalid_message)
+                raise ValueError(invalid_message)
         self._columns = columns
 
     @property
@@ -54,18 +57,18 @@ class DFMock:
 
     def grow_dataframe_to_size(self, size: int)->None:
         """ appends rows to the frame until it reaches or exceeds the size (in MB)"""
-        self.logger.debug(f"Growing dataframe to {size}MB.")
-        size = size * 1e+6
         
-        def grower(frame: pd.DataFrame)->pd.DataFrame:
-            cur_size = sys.getsizeof(frame)
-            self.logger.debug(f"grower size is now {cur_size} bytes")
-            if cur_size >= size:
-                return frame
-            else:
-                return grower(frame.append(self._generate_dataframe()))
-        sized_frame = grower(self._dataframe)
-        self._dataframe = sized_frame
+        self.logger.debug(f"Growing dataframe to {size}MB.")
+        size = size * 1<<20
+        current_size = float(sys.getsizeof(self._dataframe))
+        
+        num_iterations = math.ceil(size/current_size)
+
+        frame = self._dataframe
+        self.logger.info(f"Growing dataframe {num_iterations} times...")
+        for x in range(num_iterations):
+            self._dataframe = pd.concat([self._dataframe, frame])
+        self.logger.info("Done.")
 
     def _generate_dataframe(self)->pd.DataFrame:
         dataframe = pd.DataFrame()
