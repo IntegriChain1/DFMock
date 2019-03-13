@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 from os import path
 
 package_name = "dfmock"
-package_version = "0.0.13"
+package_version = "0.0.14"
 description = "utility for generating mock data sets as pandas dataframes"
 
 cur_directory = path.abspath(path.dirname(__file__))

@@ -5,7 +5,6 @@ import pandas as pd
 from string import ascii_lowercase as low_letters
 from datetime import datetime
 import logging
-import multiprocessing
 
 
 class DFMock:
